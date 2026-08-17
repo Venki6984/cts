@@ -13,7 +13,7 @@ import { RiskDistributionChart } from "@/components/risk/RiskDistributionChart";
 import { RiskTable } from "@/components/risk/RiskTable";
 import { PatientRiskDrawer } from "@/components/risk/PatientRiskDrawer";
 import { formatNumber } from "@/lib/utils";
-import { AlertTriangle, Users, ShieldAlert, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Users, ShieldAlert, ShieldCheck, Search, Loader2 } from "lucide-react";
 import { useDatasetStore } from "@/store/datasetStore";
 import { useFilterStore } from "@/store/filterStore";
 
@@ -36,6 +36,12 @@ export default function RiskMonitorPage() {
   const [selectedPatient, setSelectedPatient] = useState<PatientRiskDetail | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
 
+  // Analyze patient panel states
+  const [lookupId, setLookupId] = useState("PT-10001");
+  const [lookupResult, setLookupResult] = useState<PatientRiskDetail | null>(null);
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -54,9 +60,28 @@ export default function RiskMonitorPage() {
     }
   }, []);
 
+  const handleAnalyze = useCallback(async () => {
+    if (!lookupId.trim()) return;
+    setLookupLoading(true);
+    setLookupError(null);
+    try {
+      const res = await getPatientRisk(lookupId.trim());
+      if (res) {
+        setLookupResult(res);
+      } else {
+        setLookupError("Patient record not found.");
+      }
+    } catch {
+      setLookupError("Patient ID not found in current dataset.");
+    } finally {
+      setLookupLoading(false);
+    }
+  }, [lookupId]);
+
   useEffect(() => {
     load();
-  }, [load, lastUpdated, region, diagnosis, insurance, provider, newExisting]);
+    handleAnalyze();
+  }, [load, handleAnalyze, lastUpdated, region, diagnosis, insurance, provider, newExisting]);
 
   const handleSelectPatient = async (patientId: string) => {
     setDrawerOpen(true);
@@ -96,6 +121,145 @@ export default function RiskMonitorPage() {
             </p>
           </div>
           <FilterBar show={["region", "insurance", "newExisting"]} />
+        </div>
+
+        {/* ── ANALYZE A PATIENT SECTION ───────────────────────── */}
+        <div className="card" style={{ borderLeft: "4px solid var(--color-teal)" }}>
+          <h3 className="text-section-title" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+            <Users size={16} color="var(--color-teal)" />
+            ANALYZE A PATIENT
+          </h3>
+
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+            {/* Input field */}
+            <div style={{ display: "flex", gap: 8, flex: "1 1 240px", maxWidth: 360 }}>
+              <input
+                type="text"
+                placeholder="Enter Patient ID (e.g. PT-10001)"
+                value={lookupId}
+                onChange={(e) => setLookupId(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  fontSize: 13,
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--control-radius)",
+                  outline: "none",
+                  background: "var(--color-surface)",
+                }}
+              />
+              <button
+                onClick={handleAnalyze}
+                disabled={lookupLoading}
+                className="btn-primary"
+                style={{ background: "var(--color-teal)", padding: "0 14px", fontSize: 13, gap: 4 }}
+              >
+                {lookupLoading ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Search size={13} />
+                )}
+                <span>Analyze Risk</span>
+              </button>
+            </div>
+
+            {/* Results output */}
+            <div style={{ flex: "2 1 400px", minHeight: 40 }}>
+              {lookupLoading ? (
+                <div style={{ color: "var(--color-text-secondary)", fontSize: 13, display: "flex", alignItems: "center", gap: 6, paddingTop: 8 }}>
+                  <Loader2 size={14} className="animate-spin" /> Running ML predictive risk assessment models...
+                </div>
+              ) : lookupError ? (
+                <div style={{ color: "var(--color-danger)", fontSize: 13, display: "flex", alignItems: "center", gap: 6, paddingTop: 8 }}>
+                  <AlertTriangle size={14} /> {lookupError}
+                </div>
+              ) : lookupResult ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                    gap: 12,
+                    background: "var(--color-bg)",
+                    padding: "10px 14px",
+                    borderRadius: 6,
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <div>
+                    <div className="text-meta" style={{ fontSize: 9 }}>Risk Score</div>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color:
+                          lookupResult.risk_category === "HIGH"
+                            ? "var(--color-danger)"
+                            : lookupResult.risk_category === "MEDIUM"
+                            ? "var(--color-warning)"
+                            : "var(--color-success)",
+                      }}
+                    >
+                      {lookupResult.risk_score}%
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-meta" style={{ fontSize: 9 }}>Risk Level</div>
+                    <div style={{ marginTop: 2 }}>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: "1px 6px",
+                          borderRadius: 8,
+                          background:
+                            lookupResult.risk_category === "HIGH"
+                              ? "var(--color-risk-high-bg)"
+                              : lookupResult.risk_category === "MEDIUM"
+                              ? "var(--color-risk-medium-bg)"
+                              : "var(--color-risk-low-bg)",
+                          color:
+                            lookupResult.risk_category === "HIGH"
+                              ? "var(--color-risk-high)"
+                              : lookupResult.risk_category === "MEDIUM"
+                              ? "var(--color-risk-medium)"
+                              : "var(--color-risk-low)",
+                        }}
+                      >
+                        {lookupResult.risk_category}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-meta" style={{ fontSize: 9 }}>Current Stage</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-navy)", marginTop: 2 }}>
+                      {lookupResult.current_stage}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-meta" style={{ fontSize: 9 }}>Last Prediction</div>
+                    <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 2 }}>
+                      {new Date().toLocaleDateString()} (Demo Mode)
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ color: "var(--color-text-muted)", fontSize: 13, paddingTop: 8 }}>
+                  Enter a Patient ID above and click Analyze Risk.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── ACTIVE RISK MONITOR TITLE ───────────────────────── */}
+        <div style={{ marginTop: 10 }}>
+          <h2 className="text-section-title" style={{ fontSize: 16, fontWeight: 700, color: "var(--color-navy)" }}>
+            ACTIVE RISK MONITOR
+          </h2>
         </div>
 
         {/* ── KPI Row (Active Patient Partition) ──────────────── */}

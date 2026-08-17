@@ -23,7 +23,16 @@ export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const { session, isInitialized, initialize } = useAuthStore();
 
+  // Public auth pages — rendered without dashboard shell, no auth redirect
+  const PUBLIC_AUTH_ROUTES = new Set([
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/verify-code",
+    "/reset-password",
+  ]);
   const isLoginPage = pathname === "/login";
+  const isPublicPage = PUBLIC_AUTH_ROUTES.has(pathname);
 
   useEffect(() => {
     initialize();
@@ -31,16 +40,17 @@ export function AppShell({ children }: AppShellProps) {
 
   useEffect(() => {
     if (isInitialized) {
-      if (!session?.isAuthenticated && !isLoginPage) {
+      if (!session?.isAuthenticated && !isPublicPage) {
         router.replace("/login");
       } else if (session?.isAuthenticated && isLoginPage) {
+        // Redirect authenticated users away from /login only (not register/forgot etc.)
         router.replace("/");
       }
     }
-  }, [isInitialized, session, isLoginPage, router]);
+  }, [isInitialized, session, isPublicPage, isLoginPage, router]);
 
-  // If on login route, render standalone without dashboard shell
-  if (isLoginPage) {
+  // If on any public auth route, render standalone without dashboard shell
+  if (isPublicPage) {
     return <>{children}</>;
   }
 

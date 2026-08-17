@@ -28,6 +28,18 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
     title: "Patient Journey Command Center",
     subtitle: "Real-time visibility into patient progression, leakage, and journey risk",
   },
+  "/patients": {
+    title: "Patient List",
+    subtitle: "View and search all registered patients",
+  },
+  "/patients/register": {
+    title: "Register Patient",
+    subtitle: "Enroll a new patient into the journey intelligence system",
+  },
+  "/journey/event": {
+    title: "Journey Event Entry",
+    subtitle: "Update a patient's journey stage, get instant risk prediction, and save the event",
+  },
   "/funnel": {
     title: "Journey Analytics",
     subtitle: "Trace patient progression and identify where journey friction occurs",
@@ -172,11 +184,11 @@ export function Header() {
             }}
           />
           <span style={{ fontWeight: 600, color: "var(--color-navy)" }}>
-            {metadata.isCustom ? "Custom File" : "Demo Dataset"}
+            {metadata.isCustom ? "Active Data" : "Demo Dataset"}
           </span>
           <span style={{ color: "var(--color-text-muted)" }}>•</span>
           <span style={{ color: "var(--color-text-secondary)" }}>
-            {formatNumber(metadata.patient_count)} pts
+            {formatNumber(metadata.patient_count)} patients
           </span>
           <Upload size={12} color="var(--color-teal)" style={{ marginLeft: 2 }} />
         </button>
@@ -206,7 +218,7 @@ export function Header() {
           <span>AI Copilot</span>
         </Link>
 
-        {/* User / Hospital Session Badge with Logout */}
+        {/* Hospital / User Session Badge with Logout */}
         {session?.isAuthenticated && (
           <div
             style={{
@@ -219,13 +231,16 @@ export function Header() {
               borderRadius: 6,
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", textAlign: "right" }}>
+            <Building2 size={13} color="var(--color-teal)" />
+            <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: "var(--color-navy)", lineHeight: 1.1 }}>
-                {session.organization}
+                {session.hospitalName || session.organization}
               </span>
-              <span className="text-meta" style={{ fontSize: 10, color: "var(--color-text-secondary)" }}>
-                {session.userId}
-              </span>
+              {session.hospitalId && (
+                <span className="text-meta" style={{ fontSize: 10, color: "var(--color-text-muted)", fontFamily: "monospace" }}>
+                  {session.hospitalId}
+                </span>
+              )}
             </div>
 
             <button

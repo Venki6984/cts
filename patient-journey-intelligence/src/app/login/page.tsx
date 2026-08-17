@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Activity,
   Building2,
@@ -60,7 +61,7 @@ export default function LoginPage() {
 
     // Form validation
     if (!organization.trim()) {
-      setErrorMessage("Hospital / organization is required.");
+      setErrorMessage("Hospital / Organization is required.");
       return;
     }
     if (!userId.trim()) {
@@ -75,8 +76,14 @@ export default function LoginPage() {
     try {
       await login(organization, userId, password);
       router.push("/");
-    } catch {
-      setErrorMessage("Unable to sign in. Please check your details.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      // Surface network errors vs. credential errors distinctly
+      if (msg.toLowerCase().includes("connect") || msg.toLowerCase().includes("network") || msg.toLowerCase().includes("fetch")) {
+        setErrorMessage("Unable to connect to the authentication service. Please try again.");
+      } else {
+        setErrorMessage("Unable to sign in. Please check your User ID and password.");
+      }
     }
   };
 
@@ -450,20 +457,34 @@ export default function LoginPage() {
 
             {/* Field 3: Password */}
             <div>
-              <label
-                htmlFor="password-input"
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "var(--color-text-secondary)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  marginBottom: 6,
-                }}
-              >
-                Password
-              </label>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <label
+                  htmlFor="password-input"
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "var(--color-text-secondary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--color-teal)",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+                >
+                  Forgot Password?
+                </Link>
+              </div>
               <div style={{ position: "relative" }}>
                 <div
                   style={{
@@ -571,7 +592,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* 5. Clean Demo Environment Status */}
+          {/* Demo / Register Footer */}
           <div
             style={{
               marginTop: 20,
@@ -579,6 +600,7 @@ export default function LoginPage() {
               borderTop: "1px solid var(--color-border)",
               display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
               fontSize: 12,
               color: "var(--color-text-secondary)",
             }}
@@ -593,8 +615,21 @@ export default function LoginPage() {
                   display: "inline-block",
                 }}
               />
-              Demo Environment
+              {process.env.NEXT_PUBLIC_DEMO_AUTH === "false" ? "Live Environment" : "Demo Environment"}
             </span>
+            <Link
+              href="/register"
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "var(--color-text-secondary)",
+                textDecoration: "none",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-teal)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-secondary)"; }}
+            >
+              Register new account →
+            </Link>
           </div>
         </div>
       </div>

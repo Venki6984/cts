@@ -10,7 +10,7 @@ import { ChartSkeleton } from "@/components/common/LoadingSkeleton";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { GlobalSHAPChart } from "@/components/shap/GlobalSHAPChart";
 import { PatientSHAPWaterfall } from "@/components/shap/PatientSHAPWaterfall";
-import { User, Sparkles } from "lucide-react";
+import { User, Sparkles, Search, Loader2 } from "lucide-react";
 import { useDatasetStore } from "@/store/datasetStore";
 import { useFilterStore } from "@/store/filterStore";
 
@@ -23,6 +23,7 @@ export default function ShapPage() {
   const [globalData, setGlobalData] = useState<GlobalSHAPImportance[]>([]);
   const [patientData, setPatientData] = useState<PatientSHAPExplanation | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState("PT-10001");
+  const [searchInput, setSearchInput] = useState("PT-10001");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -51,6 +52,12 @@ export default function ShapPage() {
     load();
   }, [load, lastUpdated, region, diagnosis, insurance, provider, newExisting]);
 
+  const handleSearch = () => {
+    if (searchInput.trim()) {
+      setSelectedPatientId(searchInput.trim());
+    }
+  };
+
   if (error) return <ErrorState onRetry={load} />;
 
   return (
@@ -72,30 +79,37 @@ export default function ShapPage() {
           </p>
         </div>
 
-        {/* Patient Selector */}
+        {/* Patient Selector Search */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <User size={16} color="var(--color-teal)" />
-          <span className="text-meta" style={{ fontWeight: 600 }}>Select Patient:</span>
-          <select
-            value={selectedPatientId}
-            onChange={(e) => setSelectedPatientId(e.target.value)}
-            style={{
-              padding: "7px 14px",
-              fontSize: 13,
-              fontWeight: 700,
-              borderRadius: "var(--control-radius)",
-              border: "1px solid var(--color-teal)",
-              background: "var(--color-primary-light)",
-              color: "var(--color-teal)",
-              outline: "none",
-              cursor: "pointer",
-            }}
-          >
-            <option value="PT-10001">PT-10001 (High Risk — 91%)</option>
-            <option value="PT-10002">PT-10002 (High Risk — 84%)</option>
-            <option value="PT-10003">PT-10003 (Medium Risk — 54%)</option>
-            <option value="PT-10004">PT-10004 (Low Risk — 28%)</option>
-          </select>
+          <span className="text-meta" style={{ fontWeight: 600 }}>Analyze Patient:</span>
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              type="text"
+              placeholder="e.g. PT-10001"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              style={{
+                padding: "6px 12px",
+                fontSize: 13,
+                border: "1px solid var(--color-teal)",
+                borderRadius: "var(--control-radius)",
+                background: "var(--color-primary-light)",
+                color: "var(--color-navy)",
+                outline: "none",
+                width: 140,
+              }}
+            />
+            <button
+              onClick={handleSearch}
+              className="btn-primary"
+              style={{ background: "var(--color-teal)", padding: "0 12px", fontSize: 13, gap: 4 }}
+            >
+              <Search size={13} />
+              <span>Explain</span>
+            </button>
+          </div>
         </div>
       </div>
 

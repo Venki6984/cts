@@ -35,7 +35,7 @@ export function LeakageDrawer({ isOpen, onClose, data, loading }: LeakageDrawerP
       isOpen={isOpen}
       onClose={onClose}
       title={data ? `Leakage Investigation: ${data.stage}` : "Leakage Investigation"}
-      subtitle="Root-cause metrics, geographic disparities, and recommended interventions"
+      subtitle="Leakage metrics, geographic disparities, and recommended interventions"
       id="leakage-drawer"
       width={520}
     >
@@ -91,7 +91,7 @@ function LeakageDrawerContent({
       </div>
 
       {/* ── Key Leakage Drivers ───────────────────────────── */}
-      <Section title="Top Root-Cause Drivers">
+      <Section title="Top Associated Drivers">
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {data.top_drivers.slice(0, 3).map((d, i) => (
             <div

@@ -163,6 +163,56 @@ export default function CommandCenterPage() {
           <FilterBar show={["region", "insurance", "newExisting"]} />
         </div>
 
+        {/* ── Quick Operational Actions ───────────────────────── */}
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+            background: "var(--color-surface)",
+            padding: "14px 18px",
+            borderRadius: 8,
+            border: "1px solid var(--color-border)",
+            borderLeft: "4px solid var(--color-teal)",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--color-navy)", marginRight: 8 }}>
+            QUICK OPERATIONS:
+          </span>
+          <Link
+            href="/patients/register"
+            className="btn-primary"
+            style={{
+              padding: "8px 14px",
+              fontSize: 12,
+              fontWeight: 600,
+              textDecoration: "none",
+              background: "var(--color-teal)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span>+ Register Patient</span>
+          </Link>
+          <Link
+            href="/journey/event"
+            className="btn-secondary"
+            style={{
+              padding: "8px 14px",
+              fontSize: 12,
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span>+ Update Journey</span>
+          </Link>
+        </div>
+
         {/* ── Signal Cards (5 Cards) ──────────────────────────── */}
         {loading || !data ? (
           <KPIGridSkeleton count={5} />

@@ -35,12 +35,11 @@ interface ChatMessage {
 }
 
 const AI_PAGE_PROMPTS = [
-  "What is the biggest leakage point?",
-  "Why is PA causing drop-off?",
-  "Who may drop next?",
-  "Which region has highest leakage?",
-  "Explain why this patient is high risk.",
-  "What intervention should we prioritize?",
+  "Why is the highest leakage at Prior Authorization?",
+  "Why are patients dropping off?",
+  "Which cohort has the highest risk?",
+  "Explain this patient's risk.",
+  "What action should we take?",
 ];
 
 export default function AIPage() {
@@ -291,6 +290,16 @@ export default function AIPage() {
                       width: "100%",
                     }}
                   >
+                    {/* Bot header disclaimer */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--color-border)", paddingBottom: 8 }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: "var(--color-teal)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                        ✨ AI-ASSISTED RECOMMENDATION
+                      </span>
+                      <span style={{ fontSize: 9, color: "var(--color-text-muted)", fontStyle: "italic" }}>
+                        Not a medical decision. Clinical decision support only.
+                      </span>
+                    </div>
+
                     {/* INSIGHT */}
                     <div>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "var(--color-teal)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 3 }}>
